@@ -1,0 +1,18 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler # подключаем чтобы количество подов изменялось в заввисимости от нагрузки на приложение
+metadata:
+  name: mindbox-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mindbox-app # название нашего деплоймента с приложением
+  minReplicas: 2 # для баланса между экономией ресурсов и отказоустойчивость.ю
+  maxReplicas: 4 # в ТЗ сказано что 4 пода достаточно для работы в моменты пиковой нагрузки днем
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80 # при загрузке в 80% CPU подключается новый под

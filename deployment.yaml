@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mindbox-app
+  labels:
+    name: mindbox-app
+spec:
+  replicas: 2 # это под вопросом. возможно лучше поставить тут 3 реплики
+  selector:
+    matchLabels:
+      name: mindbox-app
+  template:
+    metadata:
+      labels:
+        name: mindbox-app
+    spec:
+      containers:
+      - image: mindbox-app:1.0 # не знал какой базовый образ использовать, пусть будет так
+        name: mindbox-app
+        resources:
+          requests:
+            cpu: "100m" # постоянный уровень загрузки 0.1 cpu
+            memory: "128M" # постоянное потребление памяти
+          limits:
+            cpu: "500m"
+            memory: "256M"
+        livenessProbe:
+          httpGet:
+            path: /_status/healthz
+            port: 80
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /_status/healthz
+            port: 80
+          initialDelaySeconds: 12 # время для инициализации 5-10 секунд. делаем с небольшим запасом
+          timeoutSeconds: 5
+        ports:
+        - containerPort:  80
+          name: mindbox-app--port
+      restartPolicy: Always
+      imagePullPolicy: Always
